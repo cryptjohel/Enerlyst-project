@@ -1,30 +1,30 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
-import { Toaster } from "@/components/ui/toaster"
-import { AuthProvider } from "@/components/auth-provider"
-import { ThemeProvider } from "@/components/theme-provider"
-import { AIChat } from "@/components/ai-chat"
+import type { Metadata } from "next";
+import "./globals.css";
+import { Inter } from "next/font/google";
+import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/components/auth-provider";
+import { AIChat } from "@/components/ai-chat";
+import { Toaster } from "@/components/ui/toaster";
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Enerlyst - AI-Powered Energy Optimization | Pelagus Real Estate",
-  description:
-    "Monitor, analyze, and reduce energy costs with AI-powered insights. Built by Pelagus Real Estate and Energy Solutions.",
-    generator: 'v0.dev'
-}
+  title: "Enerlyst | Smart Energy Optimization",
+  description: "AI-powered platform for tracking, optimizing, and reducing energy costs in real estate.",
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <body
+        suppressHydrationWarning
+        className={`${inter.className} min-h-screen bg-background text-foreground antialiased`}
+      >
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthProvider>
             {children}
             <AIChat />
@@ -33,5 +33,5 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }

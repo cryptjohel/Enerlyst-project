@@ -1,34 +1,36 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Navbar } from "./navbar"
-import { useAuth } from "./auth-provider"
-import { Zap, Calculator, BarChart3, Download, TrendingUp, Leaf, DollarSign, Home } from "lucide-react"
-import { DieselCalculator } from "./diesel-calculator"
-import { ApplianceProfiler } from "./appliance-profiler"
-import { ReportsPage } from "./reports-page"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Navbar } from "./navbar";
+import { Zap, Calculator, BarChart3, Download, TrendingUp, Leaf, DollarSign, Home } from "lucide-react";
+import { DieselCalculator } from "./diesel-calculator";
+import { ApplianceProfiler } from "./appliance-profiler";
+import { ReportsPage } from "./reports-page";
 
-type PageType = "overview" | "diesel" | "appliances" | "reports"
+type PageType = "overview" | "diesel" | "appliances" | "reports";
 
-export function PersonalDashboard() {
-  const { user } = useAuth()
-  const [currentPage, setCurrentPage] = useState<PageType>("overview")
+interface PersonalDashboardProps {
+  userName: string;
+}
+
+export function PersonalDashboard({ userName }: PersonalDashboardProps) {
+  const [currentPage, setCurrentPage] = useState<PageType>("overview");
 
   const renderPage = () => {
     switch (currentPage) {
       case "diesel":
-        return <DieselCalculator />
+        return <DieselCalculator />;
       case "appliances":
-        return <ApplianceProfiler />
+        return <ApplianceProfiler />;
       case "reports":
-        return <ReportsPage />
+        return <ReportsPage />;
       default:
-        return <OverviewPage />
+        return <OverviewPage userName={userName} />;
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -44,7 +46,7 @@ export function PersonalDashboard() {
                 <span className="font-medium">Personal Dashboard</span>
               </div>
               <Badge variant="secondary" className="bg-[#22C55E]/10 text-[#22C55E]">
-                {user?.name}
+                {userName}
               </Badge>
             </div>
 
@@ -92,14 +94,15 @@ export function PersonalDashboard() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-function OverviewPage() {
+// Include userName for personalized greeting on the overview page
+function OverviewPage({ userName }: { userName: string }) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Personal Energy Dashboard</h1>
+        <h1 className="text-3xl font-bold text-foreground">Welcome, {userName} 👋</h1>
         <p className="text-muted-foreground">Monitor and optimize your home energy usage</p>
       </div>
 
@@ -190,5 +193,5 @@ function OverviewPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

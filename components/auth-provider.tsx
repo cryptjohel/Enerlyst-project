@@ -1,94 +1,131 @@
 "use client"
 
-import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
-
-interface User {
-  id: string
-  email: string
-  name: string
-  userType: "personal" | "estate" | "office" | "factory"
-  companyName?: string
-  inviteCode?: string
-}
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile,
+  User as FirebaseUser,
+} from "firebase/auth"
+import { auth, db } from "@/lib/firebase"
+import { doc, setDoc } from "firebase/firestore"
+import { useGeolocation } from "@/hooks/useGeolocation"
 
 interface AuthContextType {
-  user: User | null
-  login: (email: string, password: string) => Promise<void>
+  user: FirebaseUser | null
+  loading: boolean
   signup: (
     email: string,
     password: string,
-    name: string,
-    userType: User["userType"],
-    companyName?: string,
+    fullName: string,
+    userType: string,
+    companyName?: string
   ) => Promise<void>
-  logout: () => void
-  loading: boolean
+  login: (email: string, password: string) => Promise<void>
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<FirebaseUser | null>(null)
   const [loading, setLoading] = useState(true)
+  const location = useGeolocation()
 
+  // ✅ Track auth state
   useEffect(() => {
-    // Simulate auth check
-    const savedUser = localStorage.getItem("enerlyst_user")
-    if (savedUser) {
-      setUser(JSON.parse(savedUser))
-    }
-    setLoading(false)
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser)
+      setLoading(false)
+    })
+    return () => unsubscribe()
   }, [])
 
-  const login = async (email: string, password: string) => {
-    // Simulate Firebase auth
-    const mockUser: User = {
-      id: "1",
-      email,
-      name: email.split("@")[0],
-      userType: "personal",
+  // ✅ Save location on login
+  useEffect(() => {
+    const saveLocationToFirestore = async () => {
+      if (user && location?.city) {
+        try {
+          await setDoc(
+            doc(db, "users", user.uid),
+            {
+              location: {
+                city: location.city,
+                state: location.state,
+                country: location.country,
+                latitude: location.latitude,
+                longitude: location.longitude,
+              },
+            },
+            { merge: true }
+          )
+        } catch (error) {
+          console.error("❌ Error saving location:", error)
+        }
+      }
     }
-    setUser(mockUser)
-    localStorage.setItem("enerlyst_user", JSON.stringify(mockUser))
-  }
 
+    saveLocationToFirestore()
+  }, [user, location])
+
+  // ✅ Signup logic
   const signup = async (
     email: string,
     password: string,
-    name: string,
-    userType: User["userType"],
-    companyName?: string,
+    fullName: string,
+    userType: string,
+    companyName?: string
   ) => {
-    // Generate invite code for estate/office users
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+    const newUser = userCredential.user
+
+    // Update display name
+    await updateProfile(newUser, {
+      displayName: fullName,
+    })
+
+    // Create inviteCode if needed
     const inviteCode =
-      userType === "estate" || userType === "office"
+      userType === "estate" || userType === "office" || userType === "factory"
         ? Math.random().toString(36).substring(2, 8).toUpperCase()
         : undefined
 
-    const mockUser: User = {
-      id: Date.now().toString(),
+    // Save metadata
+    await setDoc(doc(db, "users", newUser.uid), {
       email,
-      name,
+      fullName,
       userType,
-      companyName,
-      inviteCode,
-    }
-    setUser(mockUser)
-    localStorage.setItem("enerlyst_user", JSON.stringify(mockUser))
+      companyName: companyName || "",
+      inviteCode: inviteCode || "",
+      createdAt: new Date().toISOString(),
+    })
+
+    // Set user with updated displayName
+    setUser({ ...newUser, displayName: fullName })
   }
 
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem("enerlyst_user")
+  // ✅ Login logic
+  const login = async (email: string, password: string) => {
+    await signInWithEmailAndPassword(auth, email, password)
   }
 
-  return <AuthContext.Provider value={{ user, login, signup, logout, loading }}>{children}</AuthContext.Provider>
+  // ✅ Logout logic
+  const logout = async () => {
+    await signOut(auth)
+  }
+
+  return (
+    <AuthContext.Provider value={{ user, loading, signup, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext)
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider")
   }
   return context

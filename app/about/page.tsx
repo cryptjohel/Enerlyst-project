@@ -1,3 +1,4 @@
+"use client";
 import { Navbar } from "@/components/navbar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Zap, Users, Target, Award } from "lucide-react"

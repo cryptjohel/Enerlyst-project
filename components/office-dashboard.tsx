@@ -8,15 +8,19 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { Navbar } from "./navbar"
-import { useAuth } from "./auth-provider"
-import { Building, Users, Send, Copy, TrendingUp, Leaf, DollarSign, Zap, Award, UserPlus } from "lucide-react"
+import { Users, Send, Copy, TrendingUp, Leaf, DollarSign, Zap, Award, UserPlus, Building } from "lucide-react"
 import { GroupDashboard } from "./group-dashboard"
 import { ReportsPage } from "./reports-page"
 
 type PageType = "overview" | "teams" | "invitations" | "reports"
 
-export function OfficeDashboard() {
-  const { user } = useAuth()
+interface OfficeDashboardProps {
+  userName: string
+  companyName?: string
+  inviteCode?: string
+}
+
+export function OfficeDashboard({ userName, companyName, inviteCode }: OfficeDashboardProps) {
   const [currentPage, setCurrentPage] = useState<PageType>("overview")
 
   const renderPage = () => {
@@ -24,11 +28,11 @@ export function OfficeDashboard() {
       case "teams":
         return <GroupDashboard />
       case "invitations":
-        return <OfficeInvitationsPage />
+        return <OfficeInvitationsPage inviteCode={inviteCode} />
       case "reports":
         return <ReportsPage />
       default:
-        return <OfficeOverviewPage />
+        return <OfficeOverviewPage userName={userName} companyName={companyName} inviteCode={inviteCode} />
     }
   }
 
@@ -46,48 +50,32 @@ export function OfficeDashboard() {
                 <span className="font-medium">Office Dashboard</span>
               </div>
               <Badge variant="secondary" className="bg-[#22C55E]/10 text-[#22C55E] mb-1">
-                {user?.companyName || user?.name}
+                {companyName || userName}
               </Badge>
-              {user?.inviteCode && (
+              {inviteCode && (
                 <div className="text-xs text-muted-foreground">
-                  Team Code: <span className="font-mono font-medium">{user.inviteCode}</span>
+                  Team Code: <span className="font-mono font-medium">{inviteCode}</span>
                 </div>
               )}
             </div>
 
             <nav className="space-y-1">
-              <Button
-                variant={currentPage === "overview" ? "default" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => setCurrentPage("overview")}
-              >
+              <Button variant={currentPage === "overview" ? "default" : "ghost"} className="w-full justify-start" onClick={() => setCurrentPage("overview")}>
                 <TrendingUp className="h-4 w-4 mr-2" />
                 Overview
               </Button>
 
-              <Button
-                variant={currentPage === "teams" ? "default" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => setCurrentPage("teams")}
-              >
+              <Button variant={currentPage === "teams" ? "default" : "ghost"} className="w-full justify-start" onClick={() => setCurrentPage("teams")}>
                 <Users className="h-4 w-4 mr-2" />
                 Team Management
               </Button>
 
-              <Button
-                variant={currentPage === "invitations" ? "default" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => setCurrentPage("invitations")}
-              >
+              <Button variant={currentPage === "invitations" ? "default" : "ghost"} className="w-full justify-start" onClick={() => setCurrentPage("invitations")}>
                 <UserPlus className="h-4 w-4 mr-2" />
                 Team Invitations
               </Button>
 
-              <Button
-                variant={currentPage === "reports" ? "default" : "ghost"}
-                className="w-full justify-start"
-                onClick={() => setCurrentPage("reports")}
-              >
+              <Button variant={currentPage === "reports" ? "default" : "ghost"} className="w-full justify-start" onClick={() => setCurrentPage("reports")}>
                 <Award className="h-4 w-4 mr-2" />
                 Reports
               </Button>
@@ -102,20 +90,18 @@ export function OfficeDashboard() {
   )
 }
 
-function OfficeOverviewPage() {
-  const { user } = useAuth()
-
+function OfficeOverviewPage({ userName, companyName, inviteCode }: { userName: string; companyName?: string; inviteCode?: string }) {
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Office Energy Dashboard</h1>
-        <p className="text-muted-foreground">Monitor energy usage across your office building</p>
+        <p className="text-muted-foreground">Welcome, {companyName || userName}. Monitor your office’s energy usage.</p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex justify-between">
             <CardTitle className="text-sm font-medium">Team Members</CardTitle>
             <Users className="h-4 w-4 text-[#22C55E]" />
           </CardHeader>
@@ -126,7 +112,7 @@ function OfficeOverviewPage() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex justify-between">
             <CardTitle className="text-sm font-medium">Monthly Savings</CardTitle>
             <DollarSign className="h-4 w-4 text-[#22C55E]" />
           </CardHeader>
@@ -137,18 +123,18 @@ function OfficeOverviewPage() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Office Efficiency</CardTitle>
+          <CardHeader className="flex justify-between">
+            <CardTitle className="text-sm font-medium">Efficiency</CardTitle>
             <Leaf className="h-4 w-4 text-[#22C55E]" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-[#22C55E]">92/100</div>
-            <p className="text-xs text-muted-foreground">Excellent performance</p>
+            <p className="text-xs text-muted-foreground">Great performance</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex justify-between">
             <CardTitle className="text-sm font-medium">Energy Usage</CardTitle>
             <Zap className="h-4 w-4 text-[#22C55E]" />
           </CardHeader>
@@ -159,57 +145,28 @@ function OfficeOverviewPage() {
         </Card>
       </div>
 
-      {/* Team Code Card */}
-      <Card className="bg-[#22C55E]/5 border-[#22C55E]/20">
-        <CardHeader>
-          <CardTitle className="text-[#22C55E]">Team Invite Code</CardTitle>
-          <CardDescription>Share this code with team members to join your office energy monitoring</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-2">
-            <code className="bg-background px-3 py-2 rounded font-mono text-lg font-bold">{user?.inviteCode}</code>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => {
-                navigator.clipboard.writeText(user?.inviteCode || "")
-              }}
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Manage your office energy efficiently</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button className="h-16 bg-[#22C55E] hover:bg-[#16A34A]">
-              <Users className="h-5 w-5 mr-2" />
-              Manage Teams
-            </Button>
-            <Button className="h-16 bg-[#1E2A38] hover:bg-[#1E2A38]/90">
-              <UserPlus className="h-5 w-5 mr-2" />
-              Invite Members
-            </Button>
-            <Button className="h-16 bg-blue-600 hover:bg-blue-700">
-              <Award className="h-5 w-5 mr-2" />
-              View Reports
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Team Code */}
+      {inviteCode && (
+        <Card className="bg-[#22C55E]/5 border-[#22C55E]/20">
+          <CardHeader>
+            <CardTitle className="text-[#22C55E]">Team Invite Code</CardTitle>
+            <CardDescription>Share with teammates to join your workspace</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-2">
+              <code className="bg-background px-3 py-2 rounded font-mono text-lg font-bold">{inviteCode}</code>
+              <Button variant="outline" size="icon" onClick={() => navigator.clipboard.writeText(inviteCode)}>
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
 
-function OfficeInvitationsPage() {
-  const { user } = useAuth()
+function OfficeInvitationsPage({ inviteCode }: { inviteCode?: string }) {
   const [email, setEmail] = useState("")
   const [department, setDepartment] = useState("")
   const { toast } = useToast()
@@ -217,8 +174,8 @@ function OfficeInvitationsPage() {
   const sendInvitation = () => {
     if (!email || !department) {
       toast({
-        title: "Missing information",
-        description: "Please provide both email and department.",
+        title: "Missing fields",
+        description: "Fill both fields before sending invitation.",
         variant: "destructive",
       })
       return
@@ -226,18 +183,18 @@ function OfficeInvitationsPage() {
 
     toast({
       title: "Invitation sent!",
-      description: `Invitation sent to ${email} for ${department} department`,
+      description: `Sent to ${email} - Dept: ${department}`,
     })
     setEmail("")
     setDepartment("")
   }
 
   const copyInviteLink = () => {
-    const inviteLink = `https://enerlyst.com/join/${user?.inviteCode}`
-    navigator.clipboard.writeText(inviteLink)
+    if (!inviteCode) return
+    navigator.clipboard.writeText(`https://enerlyst.com/join/${inviteCode}`)
     toast({
-      title: "Link copied!",
-      description: "Invite link copied to clipboard",
+      title: "Copied!",
+      description: "Invite link copied to clipboard.",
     })
   }
 
@@ -245,123 +202,44 @@ function OfficeInvitationsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Team Invitations</h1>
-        <p className="text-muted-foreground">Invite team members to join your office energy monitoring</p>
+        <p className="text-muted-foreground">Send or share team invite link</p>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Send Individual Invitation */}
+      <div className="grid md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Send Team Invitation</CardTitle>
-            <CardDescription>Invite a team member to join</CardDescription>
+            <CardTitle>Send Invite</CardTitle>
+            <CardDescription>Invite a team member</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="email">Team Member Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="colleague@company.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
+            <Label>Email</Label>
+            <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="teammate@company.com" />
 
-            <div>
-              <Label htmlFor="department">Department</Label>
-              <Input
-                id="department"
-                placeholder="e.g., IT, HR, Finance"
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-              />
-            </div>
+            <Label>Department</Label>
+            <Input value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="IT, Finance, etc." />
 
             <Button onClick={sendInvitation} className="w-full bg-[#22C55E] hover:bg-[#16A34A]">
-              <Send className="h-4 w-4 mr-2" />
-              Send Invitation
+              <Send className="mr-2 h-4 w-4" />
+              Send
             </Button>
           </CardContent>
         </Card>
 
-        {/* Share Team Code */}
         <Card>
           <CardHeader>
-            <CardTitle>Share Team Code</CardTitle>
-            <CardDescription>Let team members join using your office code</CardDescription>
+            <CardTitle>Invite Link</CardTitle>
+            <CardDescription>Share with others</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label>Office Team Code</Label>
-              <div className="flex items-center gap-2">
-                <code className="bg-muted px-3 py-2 rounded font-mono text-lg font-bold flex-1">
-                  {user?.inviteCode}
-                </code>
-                <Button variant="outline" size="icon" onClick={copyInviteLink}>
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div>
-              <Label>Invite Link</Label>
-              <div className="flex items-center gap-2">
-                <Input value={`https://enerlyst.com/join/${user?.inviteCode}`} readOnly className="font-mono text-sm" />
-                <Button variant="outline" size="icon" onClick={copyInviteLink}>
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="p-4 bg-muted/50 rounded-lg">
-              <p className="text-sm text-muted-foreground">
-                <strong>Instructions for team members:</strong>
-                <br />
-                1. Visit the Enerlyst website
-                <br />
-                2. Sign up for a new account
-                <br />
-                3. Enter the team code: <code className="font-mono font-bold">{user?.inviteCode}</code>
-                <br />
-                4. Start contributing to office energy monitoring
-              </p>
+            <div className="flex items-center gap-2">
+              <Input value={`https://enerlyst.com/join/${inviteCode || ""}`} readOnly className="font-mono text-sm" />
+              <Button variant="outline" size="icon" onClick={copyInviteLink}>
+                <Copy className="h-4 w-4" />
+              </Button>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Pending Invitations */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Team Invitations</CardTitle>
-          <CardDescription>Track invitation status</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {[
-              { email: "sarah.johnson@company.com", department: "IT", status: "accepted", sent: "1 week ago" },
-              { email: "mike.chen@company.com", department: "Finance", status: "pending", sent: "3 days ago" },
-              { email: "lisa.brown@company.com", department: "HR", status: "pending", sent: "2 days ago" },
-              { email: "david.wilson@company.com", department: "Operations", status: "accepted", sent: "5 days ago" },
-            ].map((invitation, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <div>
-                  <p className="font-medium">{invitation.email}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {invitation.department} • Sent {invitation.sent}
-                  </p>
-                </div>
-                <Badge
-                  variant={invitation.status === "accepted" ? "default" : "secondary"}
-                  className={invitation.status === "accepted" ? "bg-[#22C55E]" : ""}
-                >
-                  {invitation.status}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }
