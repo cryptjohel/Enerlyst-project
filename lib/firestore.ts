@@ -1,17 +1,46 @@
-import { db } from "./firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "./firebase"; // make sure you already initialized firebase
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+} from "firebase/firestore";
 
-export const saveCalculation = async (userId: string, type: "diesel" | "load", data: any) => {
+// Save calculation result (appliance or diesel)
+export async function saveCalculation(
+  uid: string,
+  type: "appliance" | "diesel",
+  data: any
+) {
   try {
-    const docRef = await addDoc(collection(db, "users", userId, "calculations"), {
+    const ref = collection(db, "calculations");
+    await addDoc(ref, {
+      uid,
       type,
       data,
-      createdAt: serverTimestamp(),
+      createdAt: Date.now(),
     });
-    return docRef.id;
   } catch (err) {
-    console.error("❌ Failed to save calculation:", err);
+    console.error("Firestore save error:", err);
     throw err;
   }
-};
+}
 
+// Fetch history for a user
+export async function getUserHistory(uid: string) {
+  try {
+    const ref = collection(db, "calculations");
+    const q = query(ref, where("uid", "==", uid), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+
+    return snap.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as any),
+    }));
+  } catch (err) {
+    console.error("Firestore fetch error:", err);
+    throw err;
+  }
+}

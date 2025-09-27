@@ -19,9 +19,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calculator, Fuel, Zap, TrendingDown, Leaf } from "lucide-react";
+import { Calculator, Fuel } from "lucide-react";
 import { useAuth } from "@/components/auth-provider";
 import { saveCalculation } from "@/lib/firestore";
+import { Appliance } from "../types/appliance";
+
+interface DieselCalculatorProps {
+  onReportGenerated: (data: Appliance[]) => void;
+}
 
 interface DieselResults {
   dailyConsumption: number;
@@ -39,7 +44,7 @@ interface DieselResults {
   };
 }
 
-export function DieselCalculator() {
+export function DieselCalculator({ onReportGenerated }: DieselCalculatorProps) {
   const [generatorSize, setGeneratorSize] = useState("");
   const [hoursPerDay, setHoursPerDay] = useState("");
   const [daysPerWeek, setDaysPerWeek] = useState("");
@@ -74,7 +79,7 @@ export function DieselCalculator() {
     const estimatedSavings = annualCost * 0.75;
     const paybackPeriod = (solarSystemSize * 1_000_000) / estimatedSavings;
 
-    const result = {
+    const result: DieselResults = {
       dailyConsumption,
       weeklyConsumption,
       monthlyConsumption,
@@ -91,6 +96,21 @@ export function DieselCalculator() {
     };
 
     setResults(result);
+
+    // 🔑 Pass to ReportsPage in Appliance[] shape
+    const applianceLike: Appliance[] = [
+      {
+        id: `diesel-${Date.now()}`,
+        name: "Diesel Generator",
+        wattage: genSize * 1000, // kVA → W (approx)
+        quantity: 1,
+        hoursPerDay: hours,
+        location: "N/A",
+        consumption: dailyConsumption * 1000, // L → Wh approx
+        kwhPerDay: dailyConsumption, // treat dailyConsumption as kWh/day approx
+      },
+    ];
+    onReportGenerated(applianceLike);
 
     if (user) {
       await saveCalculation(user.uid, "diesel", {
