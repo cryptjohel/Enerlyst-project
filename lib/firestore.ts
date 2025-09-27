@@ -14,3 +14,4 @@ export const saveCalculation = async (userId: string, type: "diesel" | "load", d
     throw err;
   }
 };
+

@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Navbar } from "./navbar"
 import { Users, Send, Copy, TrendingUp, Leaf, DollarSign, Zap, Award, UserPlus, Building } from "lucide-react"
 import { GroupDashboard } from "./group-dashboard"
-import { ReportsPage } from "./reports-page"
+import ReportsPage from "./reports-page";
 
 type PageType = "overview" | "teams" | "invitations" | "reports"
 

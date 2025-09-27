@@ -10,7 +10,8 @@ import { useToast } from "@/hooks/use-toast"
 import { Navbar } from "./navbar"
 import { Copy, Send, Users, Award, TrendingUp, DollarSign, Leaf, Building, AlertTriangle } from "lucide-react"
 import { GroupDashboard } from "./group-dashboard"
-import { ReportsPage } from "./reports-page"
+import ReportsPage from "./reports-page";
+
 import { EstateAdminCalculator } from "./estate-admin-calculator"
 
 interface EstateDashboardProps {

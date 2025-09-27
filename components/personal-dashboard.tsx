@@ -6,9 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Navbar } from "./navbar";
 import { Zap, Calculator, BarChart3, Download, TrendingUp, Leaf, DollarSign, Home } from "lucide-react";
-import { DieselCalculator } from "./diesel-calculator";
-import { ApplianceProfiler } from "./appliance-profiler";
-import { ReportsPage } from "./reports-page";
+import { DieselCalculator } from "@/components/diesel-calculator"; // named export
+import ApplianceProfiler from "@/components/appliance-profiler"; // ✅ default export
+import ReportsPage from "@/components/reports-page"; // ✅ default export
 
 type PageType = "overview" | "diesel" | "appliances" | "reports";
 
@@ -24,11 +24,17 @@ export function PersonalDashboard({ userName }: PersonalDashboardProps) {
       case "diesel":
         return <DieselCalculator />;
       case "appliances":
-        return <ApplianceProfiler />;
+        return (
+          <ApplianceProfiler
+            onReportGenerated={(data: unknown) => {
+              console.log("📊 Report generated:", data);
+            }}
+          />
+        );
       case "reports":
         return <ReportsPage />;
       default:
-        return <OverviewPage userName={userName} />;
+        return <OverviewPage userName={userName} setCurrentPage={setCurrentPage} />;
     }
   };
 
@@ -97,8 +103,14 @@ export function PersonalDashboard({ userName }: PersonalDashboardProps) {
   );
 }
 
-// Include userName for personalized greeting on the overview page
-function OverviewPage({ userName }: { userName: string }) {
+// ✅ OverviewPage now accepts setCurrentPage so Quick Actions work
+function OverviewPage({
+  userName,
+  setCurrentPage,
+}: {
+  userName: string;
+  setCurrentPage: (page: PageType) => void;
+}) {
   return (
     <div className="space-y-6">
       <div>
@@ -153,11 +165,17 @@ function OverviewPage({ userName }: { userName: string }) {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button className="h-16 bg-[#22C55E] hover:bg-[#16A34A]">
+            <Button
+              className="h-16 bg-[#22C55E] hover:bg-[#16A34A]"
+              onClick={() => setCurrentPage("diesel")}
+            >
               <Calculator className="h-5 w-5 mr-2" />
               Calculate Diesel Costs
             </Button>
-            <Button className="h-16 bg-[#1E2A38] hover:bg-[#1E2A38]/90">
+            <Button
+              className="h-16 bg-[#1E2A38] hover:bg-[#1E2A38]/90"
+              onClick={() => setCurrentPage("appliances")}
+            >
               <BarChart3 className="h-5 w-5 mr-2" />
               Profile Appliances
             </Button>
